@@ -12,7 +12,7 @@ from PIL import Image
 import copy
 from peft import get_peft_model, LoraConfig, TaskType
 
-image_processor = ViltImageProcessor.from_pretrained('./models/viltb32')
+image_processor = ViltImageProcessor.from_pretrained('./models/viltb32')  # https://huggingface.co/dandelin/vilt-b32-mlm
 image_processor.do_rescale = False
 tokenizer = BertTokenizer.from_pretrained('./models/viltb32', do_lower_case=True)
 max_text_len = 128
@@ -208,13 +208,14 @@ class RACCT(torch.nn.Module):
             rimage_emb = rembedding[:, self.max_text_len:self.max_text_len+self.max_image_len, :]
             rtextfeat = rtext_emb.mean(dim = 1)    
 
+
             # if CAR-MFL setting 
             # image_emb = image_emb.permute(0,2,1)
             # image_emb = self.pool(image_emb)
             # image_emb = image_emb.permute(0,2,1) 
             # rimage_emb = rimage_emb.permute(0,2,1)
             # rimage_emb = self.poolt(rimage_emb)
-            # rimage_emb = rimage_emb.permute(0,2,1) #else SKIP and comment this
+            # rimage_emb = rimage_emb.permute(0,2,1) #else SKIP and comment this            
 
         contextp_batch = self.disease_aware_prompt.unsqueeze(0)      
         contextp_batch = contextp_batch.expand(img.size(0), -1, -1)  # [B, 14, 768]
@@ -238,7 +239,7 @@ class RACCT(torch.nn.Module):
         #         #  key_padding_mask=key_padding_mask
         #     )
         #     recimage_emb = self.MMG_t(attn_txt)
-        #     image_emb = self.lbd * recimage_emb + (1-self.lbd) * rimage_emb
+        #     image_emb = self.lbd * recimage_emb + (1-self.lbd) * rimage_emb   # CARMFL setting
 
         output = torch.cat([text_emb, image_emb], dim=1)
 
