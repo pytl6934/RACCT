@@ -208,24 +208,18 @@ class RACCT(torch.nn.Module):
             rimage_emb = rembedding[:, self.max_text_len:self.max_text_len+self.max_image_len, :]
             rtextfeat = rtext_emb.mean(dim = 1)    
 
-            # if CAR-MFL 
-            image_emb = image_emb.permute(0,2,1)
-            image_emb = self.pool(image_emb)
-            image_emb = image_emb.permute(0,2,1) 
-            rimage_emb = rimage_emb.permute(0,2,1)
-            rimage_emb = self.poolt(rimage_emb)
-            rimage_emb = rimage_emb.permute(0,2,1) #else SKIP
+            # if CAR-MFL setting 
+            # image_emb = image_emb.permute(0,2,1)
+            # image_emb = self.pool(image_emb)
+            # image_emb = image_emb.permute(0,2,1) 
+            # rimage_emb = rimage_emb.permute(0,2,1)
+            # rimage_emb = self.poolt(rimage_emb)
+            # rimage_emb = rimage_emb.permute(0,2,1) #else SKIP and comment this
 
         contextp_batch = self.disease_aware_prompt.unsqueeze(0)      
         contextp_batch = contextp_batch.expand(img.size(0), -1, -1)  # [B, 14, 768]
 
         if modality == "image":
-        # B, L, D = image_emb.shape 
-        # tmp = copy.deepcopy(image_emb.view(B * L, D))      # reshape to [B*L, D]
-        # tmp = self.MMG(tmp)              # apply MLP
-        # tmp = tmp.view(B, L, D)          # reshape back to [B, L, D]
-        # text_emb = self.MMG(image_emb)
-
             attn_img, attn_weights1 = self.cross_attn(
                 query=image_emb,       # [B, Q, D]
                 key=contextp_batch,        # [B, T, D]
@@ -236,19 +230,15 @@ class RACCT(torch.nn.Module):
             text_emb = self.lbd * rectext_emb + (1-self.lbd) * rtext_emb
             # text_emb =  rtext_emb
 
-        if modality == "text":
-            attn_txt, attn_weights1 = self.cross_attn_t(
-                query=text_emb,       # [B, Q, D]
-                key=contextp_batch,        # [B, T, D]
-                value=contextp_batch,      # [B, T, D]
-                #  key_padding_mask=key_padding_mask
-            )
-            recimage_emb = self.MMG_t(attn_txt)
-            image_emb = self.lbd * recimage_emb + (1-self.lbd) * rimage_emb
-
-        # # text_emb, _ = self.fusgate(rectext_emb, rtext_emb) 
-        # # crtxt = self.fusgate(rtext_emb, rectext_emb)
-        # # text_emb = crtxt
+        # if modality == "text":
+        #     attn_txt, attn_weights1 = self.cross_attn_t(
+        #         query=text_emb,       # [B, Q, D]
+        #         key=contextp_batch,        # [B, T, D]
+        #         value=contextp_batch,      # [B, T, D]
+        #         #  key_padding_mask=key_padding_mask
+        #     )
+        #     recimage_emb = self.MMG_t(attn_txt)
+        #     image_emb = self.lbd * recimage_emb + (1-self.lbd) * rimage_emb
 
         output = torch.cat([text_emb, image_emb], dim=1)
 
