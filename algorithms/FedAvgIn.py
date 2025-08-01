@@ -18,20 +18,13 @@ import gc
 from datasets.mimic import MimicPublic
 from .ClientTrainers import ClassificationTrainer as ClientClassificationTrainer,  ClassificationTrainerRAG1
 from .ServerTrainers import ClassificationTrainer as ServerClassificationTrainer
-from networks.classifier import EnhancedCrossAttentionFusion
 from utils.retrieval import ModalityRetrival
 from sklearn.metrics import auc
-from transformers import CLIPModel, CLIPProcessor
 import torch.nn.functional as F
-from networks import get_mmclf, EncoderResNet, EncoderBert
 from utils.utils import find_closest_vector, find_top_k_closest_vectors, jaccard_similarity
 import operator
 import random
 from datasets.RSNA2 import RSNA2
-from datasets.chestpneu import ChestXRayTestDataset
-
-
-
 
 class FedAvgInRAG:
     def __init__(self, args, logger, wandb):
