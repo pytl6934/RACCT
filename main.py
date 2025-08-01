@@ -57,7 +57,7 @@ def args():
                         help='Location for client configs')
     parser.add_argument('--comm_rounds', type=int, default=1200)
     parser.add_argument('--seed', type=int, default=3407)
-    parser.add_argument('--algorithm', type=str, default='fedavgRAG', choices=['standalone', 'full', 'fedavg', 'fedavgln', 'fedavgRAG', 'fedavgzeropublic'],
+    parser.add_argument('--algorithm', type=str, default='fedavgRAG', choices=['fedavgRAG'],
                         help='Choice of Federated Averages')
     parser.add_argument('--num_clients', type=int, default=2,
                         help='total number of multimodal clients')
@@ -93,21 +93,8 @@ if __name__ == "__main__":
     logger = setup_loggger('info', loginfo)
     logger.info(f"gpu   {gpux}")
     logger.info(f"{args.prefix}")
-    logger.info('\n-----  IU 0,1 2mm  MIMIC 2,3 2mm w chexpert 4img  4 5 6 7| 2 3 4 5 clip clsloss promptLearn labelenhanced ----------------\n')
-    # logger.info(f" IU 2mm xpert8img clipwithprompt-miss notmiss clsloss  ")
-    # logger.info(f"MIMIC 2mm chexpert  clip clsloss")
-    logger.info(f"# T_max =100, init_lr = 6e-4 min_lr =8e-5")
 
-    if args.algorithm == 'standalone':
-        trainer = ClassificationTrainer(args, args.server_config_path, logger, wandb)
-        trainer.run_standalone()
-    elif args.algorithm == 'fedavg':
-        engine = FedAvg(args, logger,wandb)
-        engine.run()
-    elif args.algorithm == 'fedavgln':
-        engine = FedAvgIn(args, logger,wandb)
-        engine.run()
-    elif args.algorithm == 'fedavgRAG':
+    if args.algorithm == 'fedavgRAG':
         engine = FedAvgInRAG(args, logger, wandb)
         engine.run()
 
