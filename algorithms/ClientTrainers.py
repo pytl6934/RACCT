@@ -18,7 +18,6 @@ from datasets.mimic import MimicMultiModal, MimicPublic
 from datasets.iu_xray import IUXrayMultiModal
 from datasets.chexpert import chexpertdata
 import torch.nn as nn
-from networks import get_mmclf, EncoderResNet, EncoderBert
 from transformers import AutoModel,AutoProcessor
 from torchmetrics import MetricCollection
 from torchmetrics.classification import MultilabelAUROC, MulticlassAUROC, MultilabelPrecisionRecallCurve, MultilabelAccuracy, MultilabelF1Score, MultilabelAveragePrecision
