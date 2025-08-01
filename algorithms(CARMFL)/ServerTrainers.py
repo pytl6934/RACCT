@@ -14,7 +14,7 @@ from torchmetrics.classification import MultilabelAUROC, MulticlassAUROC
 from models import ViltModel, ViltImageProcessor, RACCT
 from transformers import BertTokenizer
 from peft import get_peft_model, LoraConfig, TaskType
-from models import MoMKE
+
 
 def init_weights(m):
     if isinstance(m, nn.Conv2d):
