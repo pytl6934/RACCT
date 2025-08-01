@@ -40,7 +40,7 @@ class FedAvgInRAG:
         self.num_clients = self.num_mm_clients + self.num_img_clients + self.num_txt_clients
         self.logger = logger
         self.server = ServerClassificationTrainer(self.args, self.args.server_config_path, "MIMIC", logger, "RAG", False )
-        self.warmup = 30
+
         self.mappings = {}
         self.mappings1 = {}
         self.rdata = {}
