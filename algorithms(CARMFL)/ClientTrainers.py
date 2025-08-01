@@ -217,9 +217,6 @@ class ClassificationTrainerRAG1():
 
         self.mappings = {a:b for (a,b) in zip(local_idx, closet_idx)}
 
-        # if self.args.method == "rapcc":
-        #     torch.save(self.mappings, f"./CARckpts/gptf/{self.dataname}_map_{self.client_id}.pth")
-
         # with tqdm(self.test_loader, unit="batch") as tepoch:
         #     for data in tepoch:
         #         frames = data["image"].cuda()
@@ -309,17 +306,16 @@ class ClassificationTrainerRAG1():
         retrived_img = torch.stack(retrived_img, dim=0)
         return {"img":retrived_img, "txt": retrived_txt}
     
-    def run(self, comms, img_vec, txt_vec, labels, idxs, gmodel, mmmodel, imgmodel, txtmodel):
+    def run(self, comms, img_vec, txt_vec, labels, idxs, gmodel):
         print(f"client_id : {self.client_id} training started")
         model = copy.deepcopy(gmodel)
         model = model.cuda()
-        permodel = "a"
 
         self.round = comms
         cos_inner = math.pi * comms / T_max
         self.lr = min_lr + 0.5 * (init_lr - min_lr) * (1 + math.cos(cos_inner))
 
-        if self.args.method == "rapcc" or self.args.method =="ragpt":
+        if self.args.method == "rapcc":
             if comms == 0:
                 if self.modality == "image" :
                     self.generate_RAG_mapping(img_vec, labels, model, comms)
@@ -342,44 +338,10 @@ class ClassificationTrainerRAG1():
         model.cpu()   
         torch.save(model, f"./CARckpts/TmpMAVG1/{self.args.prefix}_{self.client_id}.pth") 
 
-        if self.args.method == "rapcc":
-            # permodel.cpu()
-            # torch.save(permodel, f"./CARckpts/TmpMAVG1/{self.args.prefix}_{self.client_id}_p.pth") 
-        
-            if comms == 0:
-                if not os.path.exists(f"./CARckpts/CARfx604/{self.dataname}_{self.client_id}_rdataidx.pth"):
-                    torch.save(self.rdata, f"./CARckpts/CARfx604/{self.dataname}_{self.client_id}_rdataidx.pth")
-                    print(f" save ./CARckpts/CARfx604/{self.dataname}_{self.client_id}_rdataidx.pth")
-                # if not os.path.exists(f"./CARckpts/CARfx/{self.dataname}_{self.client_id}_testrdataidx.pth"):
-                #     torch.save(self.rdatatest, f"./CARckpts/CARfx/{self.dataname}_{self.client_id}_testrdataidx.pth")
-                #     print(f" save ./CARckpts/CARfx/{self.dataname}_{self.client_id}_rdataidx.pth")
-
-
         torch.cuda.empty_cache()
         import gc
         gc.collect()      
         
-
-    def run1(self, comms, idxs, gmodel):
-        print(f"client_id : {self.client_id} training started")
-        model = copy.deepcopy(gmodel)
-        model = model.cuda()
-        permodel = "a"
-
-        self.round = comms
-        cos_inner = math.pi * comms / T_max
-        self.lr = min_lr + 0.5 * (init_lr - min_lr) * (1 + math.cos(cos_inner))
-
-        for i in range(1):
-            self.traineta(idxs, model)
-            # self.testeta(idxs, model)
-
-            print(f"Client_id: {self.client_id} local_epoch{self.local_epoch} communication round: {comms} round_epoch: {i}")
-            self.local_epoch += 1
-            
-        model.cpu()   
-        torch.save(model, f"./CARckpts/TmpMAVG1/{self.args.prefix}_{self.client_id}.pth") 
-
 
     def traineta(self, global_idxs, model, mmmodel, imgmodel, txtmodel):
         model.train()
